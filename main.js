@@ -171,12 +171,10 @@ let titleTextStyle = {
 
 function drawChart(chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,vAxisTitle,color,idContainer){
   // Create the data table.
-  const sortedData = chartdata.sort((a, b) => b[1] - a[1])
-
   let data = new google.visualization.DataTable();
   data.addColumn('string', columnTitle); // "State"
   data.addColumn('number', columnValueTitle); //"Students Numbers"
-  data.addRows(sortedData
+  data.addRows(chartdata
     );
   // Set chart options
   let options = {
@@ -198,10 +196,11 @@ function drawChart(chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,
     }
 
 
-function queryData(extent){
+async function queryData(extent){
   const stateQuery = new Query(
     {
   groupByFieldsForStatistics : [ "STATE" ],
+
   geometry : extent,
   spatialRelationship: "envelope-intersects",
   returnGeometry : true,
@@ -216,8 +215,9 @@ function queryData(extent){
     outStatisticFieldName: "Number_of_students_in_states",
     statisticType: "sum"
   }
-  ]
-
+  
+  ],
+  orderByFields:["Number_of_schools_in_states"],
     }
     )
     cityQuery = new Query(
@@ -236,9 +236,11 @@ function queryData(extent){
       onStatisticField: "TOT_ENROLL",
       outStatisticFieldName: "Number_of_students_in_cities",
       statisticType: "sum"
+
     }
-    ]
-  
+    ],
+    orderByFields:["Number_of_students_in_cities"],
+
       }
   
   );
