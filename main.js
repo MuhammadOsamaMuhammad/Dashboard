@@ -1,19 +1,19 @@
-// getting the divs indecator 
+// // getting the divs indecator 
 let studentIndecator = document.getElementById('studentNumber')
 let schoolIndecator = document.getElementById('schoolNumber')
-
-// Load the Visualization API and the corechart package.
+function drawChart(){}
+// // Load the Visualization API and the corechart package.
 google.charts.load('current', {'packages':['corechart']});
 
-// Set a callback to run when the Google Visualization API is loaded.
+// // Set a callback to run when the Google Visualization API is loaded.
 google.charts.setOnLoadCallback(drawChart);
 
 
 require(["esri/config", "esri/Map", "esri/views/MapView","esri/widgets/Home","esri/layers/FeatureLayer"
-,"esri/widgets/ScaleBar","esri/request","esri/rest/support/Query",
-"esri/rest/support/StatisticDefinition"],
- (esriConfig, Map, MapView,Home,FeatureLayer,ScaleBar,esriRequest,Query,StatisticDefinition) =>{
-
+,"esri/widgets/ScaleBar","esri/rest/support/Query",
+"esri/rest/support/StatisticDefinition","esri/core/reactiveUtils",],
+ (esriConfig, Map, MapView,Home,FeatureLayer,ScaleBar,Query,StatisticDefinition,reactiveUtils) =>{
+  
     // The API key
     esriConfig.apiKey = "AAPK3542306035bb457b8cc0ab823c9916aaaj3_O9svoxs84438L7Nz_ARAeZrfccj2z39F3O58g6D0c0Gh_FTzThf0Sxh8-ggb";
     
@@ -157,7 +157,9 @@ layer.featureReduction = {
 
   map.add(layer);
 
-// width and length of the charts
+
+
+// chart options
 let width = 272;
 let height = 280;
 let backgroundColor = "#3f3f3f"
@@ -166,10 +168,44 @@ let titleTextStyle = {
   fontSize: 25,               
   bold: true
 }
-//querying the data and grouping values using the STATE field 
-  let stateQuery = new Query();
 
-  stateQuery.outStatistics = [{
+function drawChart(chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,vAxisTitle,color,idContainer){
+  // Create the data table.
+  const sortedData = chartdata.sort((a, b) => b[1] - a[1])
+
+  let data = new google.visualization.DataTable();
+  data.addColumn('string', columnTitle); // "State"
+  data.addColumn('number', columnValueTitle); //"Students Numbers"
+  data.addRows(sortedData
+    );
+  // Set chart options
+  let options = {
+    title: chartTitle, //"Students per State"
+    hAxis:{title:hAxisTitle}, //"Students"
+    vAxis:{title:vAxisTitle}, // State
+    width,
+    height,
+    colors: [color],
+    backgroundColor,
+    titleTextStyle
+  };
+  // Instantiate and draw our chart, passing in some options.
+  let chartContainer = document.getElementById(idContainer)
+  chartContainer.innerHTML = "";
+  let chart = new google.visualization.BarChart(chartContainer);
+  
+  chart.draw(data, options);
+    }
+
+
+function queryData(extent){
+  const stateQuery = new Query(
+    {
+  groupByFieldsForStatistics : [ "STATE" ],
+  geometry : extent,
+  spatialRelationship: "envelope-intersects",
+  returnGeometry : true,
+  outStatistics : [{
     onStatisticField: "FID",
     outStatisticFieldName: "Number_of_schools_in_states",
     statisticType: "count"
@@ -180,178 +216,76 @@ let titleTextStyle = {
     outStatisticFieldName: "Number_of_students_in_states",
     statisticType: "sum"
   }
-  ];
-
-  stateQuery.groupByFieldsForStatistics = [ "STATE" ];
-  
-layer.queryFeatures(stateQuery).then((s)=>{
-    /////// state students and state schools to collect data and visualized as charts
-    let stateStudents = []
-    let stateSchools = []
-    let features = s.features
-    ///////////
-    let studentNumber = 0;
-    let schoolsNumber = 0
-    // sorting data to give more insights about the data when visualized
-    let sortedData = features.sort(
-      (f1, f2) => (f1.attributes.Number_of_students_in_states < f2.attributes.Number_of_students_in_states) ? 1 :
-       (f1.attributes.Number_of_students_in_states > f2.attributes.Number_of_students_in_states) ? -1 : 0);    
-    
-       for (const sortedData of features) {
-      //// calculate the number of students and schools in the data
-      studentNumber += sortedData.attributes.Number_of_students_in_states
-      schoolsNumber += sortedData.attributes.Number_of_schools_in_states
-      /////////
-      stateStudents.push([sortedData.attributes.STATE,sortedData.attributes.Number_of_students_in_states])
-      stateSchools.push([sortedData.attributes.STATE,sortedData.attributes.Number_of_schools_in_states])
-    }   
-
-    //populate the indecators with data
-    studentIndecator.textContent = `${studentNumber} Student`;
-    schoolIndecator.textContent = `${schoolsNumber} School`;
-
-  function drawChart(){
-      
-  // Create the data table.
-  let data = new google.visualization.DataTable();
-  data.addColumn('string', "State");
-  data.addColumn('number', "Students Numbers");
-  data.addRows(stateStudents
-    );
-
-  // Set chart options
-  let options = {
-    title:"Students per State",
-    hAxis:{title:"Students"},
-    vAxis:{title:"State"},
-    width,
-    height,
-    colors: ['#ffaa00'],
-    backgroundColor,
-    titleTextStyle
-  };
-
-  // Instantiate and draw our chart, passing in some options.
-  let chart = new google.visualization.BarChart(document.getElementById('state_students'));
-  
-  chart.draw(data, options);
-  // chart2.draw(data2, options);
-    }
-    drawChart()
-
-// Create the data table.
-  let data2 = new google.visualization.DataTable();
-  data2.addColumn('string', 'State');
-  data2.addColumn('number', 'Schools Number');
-  data2.addRows(stateSchools);
-
-  // Set chart options
-  let options2 = {
-    title:"Schools per State",
-    hAxis:{title:"Schools"},
-    vAxis:{title:"State"},
-    width,
-    height,
-    colors: ['#1a468d'],
-    backgroundColor,
-    titleTextStyle
-  };
-
-  // Instantiate and draw our chart, passing in some options.
-  let chart = new google.visualization.BarChart(document.getElementById('state_schools'));
-  
-  chart.draw(data2, options2);
-  });
-
-
-
-  let cityQuery = new Query();
-
-  cityQuery.outStatistics = [{
-    onStatisticField: "FID",
-    outStatisticFieldName: "Number_of_schools_in_cities",
-    statisticType: "count"
-  } 
-  ,
-  {
-    onStatisticField: "TOT_ENROLL",
-    outStatisticFieldName: "Number_of_students_in_cities",
-    statisticType: "sum"
-  }
-  ];
-
-  cityQuery.groupByFieldsForStatistics = [ "CITY" ];
-
-
-  layer.queryFeatures(cityQuery).then((s)=>{ 
-    let cityStudents = []
-    let citySchools = []
-    let features = s.features
-
-    let sortedData = features.sort(
-      (f1, f2) => (f1.attributes.Number_of_students_in_cities < f2.attributes.Number_of_students_in_cities) ? 1 :
-       (f1.attributes.Number_of_students_in_cities > f2.attributes.Number_of_students_in_cities) ? -1 : 0);    
-    
-       for (const sortedData of features) {
-      cityStudents.push([sortedData.attributes.CITY,sortedData.attributes.Number_of_students_in_cities])
-      citySchools.push([sortedData.attributes.CITY,sortedData.attributes.Number_of_schools_in_cities])
-    }   
-
-  function drawChart(){
-      
-  // Create the data table.
-  let data = new google.visualization.DataTable();
-  data.addColumn('string', "City");
-  data.addColumn('number', "Cities Numbers");
-  data.addRows(cityStudents
-    );
-
-  // Set chart options
-  let options = {
-    title:"Students per City",
-    hAxis:{title:"Students"},
-    vAxis:{title:"Cities"},
-    width,
-    height,
-    colors: ['#5499c1'],
-    backgroundColor,
-    titleTextStyle
-  };
-
-  // Instantiate and draw our chart, passing in some options.
-  let chart = new google.visualization.BarChart(document.getElementById('city_students'));
-  
-  chart.draw(data, options);
+  ]
 
     }
-    drawChart()
-
-// Create the data table.
-  let data2 = new google.visualization.DataTable();
-  data2.addColumn('string', 'City');
-  data2.addColumn('number', 'Schools Number');
-  data2.addRows(citySchools);
-
-  // Set chart options
-  let options2 = {
-    title:"Schools per City",
-    titleTextStyle,
-    hAxis:{title:"Schools"},
-    vAxis:{title:"City"},
-    width,
-    height,
-    colors: ['#578a3d'],
-    backgroundColor,
-    titleTextStyle
-    };
-
-  // Instantiate and draw our chart, passing in some options.
-  let chart = new google.visualization.BarChart(document.getElementById('city_schools'));
+    )
+    cityQuery = new Query(
+      {
+    groupByFieldsForStatistics : [ "CITY" ],
+    geometry : extent,
+    spatialRelationship: "envelope-intersects",
+    returnGeometry : true,
+    outStatistics : [{
+      onStatisticField: "FID",
+      outStatisticFieldName: "Number_of_schools_in_cities",
+      statisticType: "count"
+    } 
+    ,
+    {
+      onStatisticField: "TOT_ENROLL",
+      outStatisticFieldName: "Number_of_students_in_cities",
+      statisticType: "sum"
+    }
+    ]
   
-  chart.draw(data2, options2);
-});
+      }
+  
+  );
+  
+   layer.queryFeatures(stateQuery).then(function(response){
+  let students = []
+  let schools = []
+  let features = response.features
+  ///////////
+  let studentNumber = 0;
+  let schoolsNumber = 0
+     for (const feature of features) {
+    //// calculate the number of students and schools in the data
+    studentNumber += feature.attributes.Number_of_students_in_states
+    schoolsNumber += feature.attributes.Number_of_schools_in_states
+    /////////
+    students.push([feature.attributes.STATE,feature.attributes.Number_of_students_in_states])
+    schools.push([feature.attributes.STATE,feature.attributes.Number_of_schools_in_states])
+  }   
 
-});
-function drawChart() {
+  //populate the indecators with data
+  studentIndecator.textContent = `${studentNumber} Student`;
+  schoolIndecator.textContent = `${schoolsNumber} School`;
 
+          // chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,vAxisTitle,idContainer
+  drawChart(students,"State","Students Numbers","Students per State","Students","State",'red','state_students') // student state
+  drawChart(schools,"School","Schools Numbers","Schools per State","Schools","State",'blue','state_schools')   // school state
+
+});  
+   layer.queryFeatures(cityQuery).then(function(response){
+  let students = []
+  let schools = []
+  let features = response.features
+
+   
+     for (const feature of features) {
+    students.push([feature.attributes.CITY,feature.attributes.Number_of_students_in_cities])
+    schools.push([feature.attributes.CITY,feature.attributes.Number_of_schools_in_cities])
+  }   
+  drawChart(students,"School","Schools Numbers","Schools per city","Schools","State",'yellow','city_students') //student city 
+  drawChart(schools,"School","Schools Numbers","Schools per city","Schools","State",'green','city_schools') //school city
+});  
 }
+
+reactiveUtils.watch(
+  () => view?.extent,
+  (extent) => {
+   queryData(extent)
+  });
+});
