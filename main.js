@@ -196,7 +196,7 @@ function drawChart(chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,
     }
 
 
-async function queryData(extent){
+function queryData(extent){
   const stateQuery = new Query(
     {
   groupByFieldsForStatistics : [ "STATE" ],
@@ -288,6 +288,12 @@ async function queryData(extent){
 reactiveUtils.watch(
   () => view?.extent,
   (extent) => {
-   queryData(extent)
+    // console.log(view.updating);
+    if (!view.updating) {
+      queryData(extent)
+    }
+  },{
+    initial:false,
+    sync:false,
   });
 });
