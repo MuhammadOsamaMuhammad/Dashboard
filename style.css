@@ -3,7 +3,7 @@ body{
 }
 #container{
     width: 100%;
-    height: 650px;
+    height: 589px;
     display: flex;
 }
 header{
@@ -19,9 +19,10 @@ header span{
 }
 .chart{
     flex: 1;
-    width: 20%;
+    width: 25%;
     height: 100%;
     display: inline-block;
+    background-color: #353535;
 }
 #city_charts{
     margin-right: 15px;
@@ -30,7 +31,7 @@ header span{
     margin-left: 15px;
 }
 .mapView{
-    width: 60%;
+    width: 50%;
     margin: 5px 5px 0 5px;
 }
 #map{
@@ -42,7 +43,7 @@ header span{
 .chart div {
     width: 100%;
     height: 50%;
-    background-color: rgb(33 32 32);
+    background-color: rgb(33, 32, 32);
 }
 
 .state, .city{
@@ -66,6 +67,7 @@ footer{
     height: 96%;
     background-color: rgb(33 32 32);
     margin: 12px 5px 5px 5px;
+    font-size: large;
     color: white;
 }
 

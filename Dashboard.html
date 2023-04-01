@@ -2,19 +2,29 @@
 <html lang="en">
 
 <head>
-    <!-- using google api for the charts -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js" defer></script>
-    <meta charset="UTF-8">
+  <!-- load the amCharts base library -->
+  <script src="https://www.amcharts.com/lib/3/amcharts.js" ></script>
+  <!-- in this case, we only need bar charts, so we'll load the appropriate amCharts script -->
+  <script src="https://www.amcharts.com/lib/3/serial.js" ></script>
+  <!-- load the arcgis-rest-js scripts -->
+  <script src="https://unpkg.com/@esri/arcgis-rest-request" ></script>
+  <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer" ></script>
+  <!-- optionally load an amcharts theme; cedar provides a calcite theme -->
+  <script src="https://unpkg.com/@esri/cedar/dist/umd/themes/amCharts/calcite.js" ></script>
+  <!-- load cedar -->
+  <script src="https://unpkg.com/@esri/cedar/dist/umd/cedar.js" ></script>
+  <script src="https://js.arcgis.com/4.25/"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="main.js" defer></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/dark/main.css">
+
+  <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
        <link rel="icon" type="image/x-icon"
         href="https://www.pngitem.com/pimgs/m/399-3991300_esri-logo-hd-png-download.png">
-    <link rel="stylesheet" href="style.css">
-    <script src="main.js" defer></script>
-    <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/dark/main.css">
 
-    <script src="https://js.arcgis.com/4.25/"></script>
 
 </head>
 
@@ -25,12 +35,8 @@
     <div id="container">
 
         <div class="chart" id="city_charts">
-            <div id="city_students" class="city">
-
-            </div>
-            <div id="city_schools" class="city">
-
-            </div>
+            <div id="city_students" class="city"></div>
+            <div id="city_schools" class="city"></div>
         </div>
 
         <div class="mapView">
@@ -46,9 +52,7 @@
 
         </div>
         <div class="chart" id="state_charts">
-            <div>
-                <div id="state_students" class="state"></div>
-            </div>
+            <div id="state_students" class="state"></div>
             <div id="state_schools" class="state"></div>
         </div>
 

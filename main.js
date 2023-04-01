@@ -1,19 +1,10 @@
-// // getting the divs indecator 
-let studentIndecator = document.getElementById('studentNumber')
-let schoolIndecator = document.getElementById('schoolNumber')
-function drawChart(){}
-// // Load the Visualization API and the corechart package.
-google.charts.load('current', {'packages':['corechart']});
-
-// // Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(drawChart);
-
-
 require(["esri/config", "esri/Map", "esri/views/MapView","esri/widgets/Home","esri/layers/FeatureLayer"
-,"esri/widgets/ScaleBar","esri/rest/support/Query",
-"esri/rest/support/StatisticDefinition","esri/core/reactiveUtils",],
- (esriConfig, Map, MapView,Home,FeatureLayer,ScaleBar,Query,StatisticDefinition,reactiveUtils) =>{
-  
+,"esri/widgets/ScaleBar","esri/rest/support/Query","esri/core/reactiveUtils",],
+ (esriConfig, Map, MapView,Home,FeatureLayer,ScaleBar,Query,reactiveUtils) =>{
+
+  const indStudentsNumber = document.getElementById('studentNumber')
+  const indSchoolsNumber = document.getElementById('schoolNumber')
+    
     // The API key
     esriConfig.apiKey = "AAPK3542306035bb457b8cc0ab823c9916aaaj3_O9svoxs84438L7Nz_ARAeZrfccj2z39F3O58g6D0c0Gh_FTzThf0Sxh8-ggb";
     
@@ -146,6 +137,7 @@ layer.featureReduction = {
       labelPlacement: "center-center",
     }]
   }
+
   let scaleBar = new ScaleBar({
     view: view,
     unit:"metric"
@@ -158,142 +150,198 @@ layer.featureReduction = {
   map.add(layer);
 
 
-
-// chart options
-let width = 272;
-let height = 280;
-let backgroundColor = "#3f3f3f"
-let titleTextStyle = {
-  color: "white",                
-  fontSize: 25,               
-  bold: true
-}
-
-function drawChart(chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,vAxisTitle,color,idContainer){
-  // Create the data table.
-  let data = new google.visualization.DataTable();
-  data.addColumn('string', columnTitle); // "State"
-  data.addColumn('number', columnValueTitle); //"Students Numbers"
-  data.addRows(chartdata
-    );
-  // Set chart options
-  let options = {
-    title: chartTitle, //"Students per State"
-    hAxis:{title:hAxisTitle}, //"Students"
-    vAxis:{title:vAxisTitle}, // State
-    width,
-    height,
-    colors: [color],
-    backgroundColor,
-    titleTextStyle
-  };
-  // Instantiate and draw our chart, passing in some options.
-  let chartContainer = document.getElementById(idContainer)
-  chartContainer.innerHTML = "";
-  let chart = new google.visualization.BarChart(chartContainer);
-  
-  chart.draw(data, options);
+const definition = {
+  type: 'bar',
+  datasets: [{
+    url: layerURL,
+    query: {
+      groupByFieldsForStatistics: 'STATE',
+      outStatistics: [{
+        'statisticType': 'count',
+        'onStatisticField': 'FID',
+        'outStatisticFieldName': 'Number_of_schools_in_states'
+      }],
+      orderByFields: 'Number_of_schools_in_states DESC'
     }
+  }],
+  series: [{
+    category: {
+      field: 'STATE',
+      label: 'STATE'
+    },
+    value: {
+      field: 'Number_of_schools_in_states',
+      label: 'Number of Schools in State'
+    }
+  }]
+};
+
+const Number_of_schools_in_states = new cedar.Chart('state_schools', definition);
+Number_of_schools_in_states.show();
 
 
-function queryData(extent){
-  const stateQuery = new Query(
-    {
-  groupByFieldsForStatistics : [ "STATE" ],
 
-  geometry : extent,
-  spatialRelationship: "envelope-intersects",
-  returnGeometry : true,
-  outStatistics : [{
-    onStatisticField: "FID",
-    outStatisticFieldName: "Number_of_schools_in_states",
-    statisticType: "count"
-  } 
-  ,
+const definition2 = {
+  type: 'bar',
+  datasets: [{
+    url: layerURL,
+    query: {
+      groupByFieldsForStatistics: 'STATE',
+      outStatistics: [{
+        'statisticType': 'sum',
+        'onStatisticField': 'TOT_ENROLL',
+        'outStatisticFieldName': 'Number_of_students_in_states'
+      }],
+      orderByFields: 'Number_of_students_in_states DESC'
+    }
+  }],
+  series: [{
+    category: {
+      field: 'STATE',
+      label: 'STATE'
+    },
+    value: {
+      field: 'Number_of_students_in_states',
+      label: 'Number of Students in State'
+    }
+  }]
+};
+
+const Number_of_students_in_states = new cedar.Chart('state_students', definition2);
+
+Number_of_students_in_states.show();
+
+
+
+
+
+const definition3 = {
+  type: 'bar',
+  datasets: [{
+    url: layerURL,
+    query: {
+      groupByFieldsForStatistics: 'CITY',
+      outStatistics: [{
+        'statisticType': 'sum',
+        'onStatisticField': 'TOT_ENROLL',
+        'outStatisticFieldName': 'Number_of_students_in_cities'
+      }],
+      orderByFields: 'Number_of_students_in_cities DESC'
+    }
+  }],
+  series: [{
+    category: {
+      field: 'CITY',
+      label: 'CITY'
+    },
+    value: {
+      field: 'Number_of_students_in_cities',
+      label: 'Number of Students in City'
+    }
+  }]
+};
+
+
+
+const Number_of_students_in_city = new cedar.Chart('city_students', definition3);
+Number_of_students_in_city.show();
+
+
+
+const definition4 = {
+  type: 'bar',
+  datasets: [{
+    url: layerURL,
+    query: {
+      groupByFieldsForStatistics: 'CITY',
+      outStatistics: [{
+        'statisticType': 'count',
+        'onStatisticField': 'FID',
+        'outStatisticFieldName': 'Number_of_schools_in_cities'
+      }],
+      orderByFields: 'Number_of_schools_in_cities DESC'
+    }
+  }],
+  series: [{
+    category: {
+      field: 'CITY',
+      label: 'CITY'
+    },
+    value: {
+      field: 'Number_of_schools_in_cities',
+      label: 'Number of Schools in City'
+    }
+  }]
+};
+
+const Number_of_schools_in_cities = new cedar.Chart('city_schools', definition4);
+Number_of_schools_in_cities.show();
+
+const number_of_schools = new Query(
   {
-    onStatisticField: "TOT_ENROLL",
-    outStatisticFieldName: "Number_of_students_in_states",
-    statisticType: "sum"
-  }
-  
-  ],
-  orderByFields:["Number_of_schools_in_states"],
+      outStatistics: [{
+        'statisticType': 'count',
+        'onStatisticField': 'FID',
+        'outStatisticFieldName': 'Number_of_schools_in_cities'
+      }]
     }
     )
-    cityQuery = new Query(
+    
+const number_of_students = new Query(
       {
-    groupByFieldsForStatistics : [ "CITY" ],
-    geometry : extent,
-    spatialRelationship: "envelope-intersects",
-    returnGeometry : true,
-    outStatistics : [{
-      onStatisticField: "FID",
-      outStatisticFieldName: "Number_of_schools_in_cities",
-      statisticType: "count"
-    } 
-    ,
-    {
-      onStatisticField: "TOT_ENROLL",
-      outStatisticFieldName: "Number_of_students_in_cities",
-      statisticType: "sum"
+          outStatistics: [{
+            'statisticType': 'sum',
+            'onStatisticField': 'TOT_ENROLL',
+            'outStatisticFieldName': 'Number_of_schools_in_cities'
+          }]
+        }
+        )
+    
+    
+    
 
-    }
-    ],
-    orderByFields:["Number_of_students_in_cities"],
+    
+    
+    const update = ()=>{
 
+      Number_of_schools_in_states.datasets()[0].query.geometry = view.extent;
+      Number_of_students_in_states.datasets()[0].query.geometry = view.extent;
+      Number_of_students_in_city.datasets()[0].query.geometry = view.extent;
+      Number_of_schools_in_cities.datasets()[0].query.geometry = view.extent;
+      number_of_schools.geometry = view.extent;  
+      number_of_students.geometry = view.extent;  
+      
+      
+      
+      Number_of_students_in_states.show();
+      Number_of_schools_in_states.show();
+      Number_of_students_in_city.show();
+      Number_of_schools_in_cities.show();
+
+      Promise.all([layer.queryFeatures(number_of_schools),layer.queryFeatures(number_of_students)]).then(data=>{        
+      indStudentsNumber.textContent = `${data[0].features[0].attributes.Number_of_schools_in_cities} School`
+
+      if ((data[1].features[0].attributes.Number_of_schools_in_cities/ 1000) > 1000) {
+        indSchoolsNumber.textContent = `${(data[1].features[0].attributes.Number_of_schools_in_cities/ 1000).toFixed(0)}K Student`
+        
+      } else {
+        indSchoolsNumber.textContent = `${data[1].features[0].attributes.Number_of_schools_in_cities} Student`
       }
-  
-  );
-  
-   layer.queryFeatures(stateQuery).then(function(response){
-  let students = []
-  let schools = []
-  let features = response.features
-  ///////////
-  let studentNumber = 0;
-  let schoolsNumber = 0
-     for (const feature of features) {
-    //// calculate the number of students and schools in the data
-    studentNumber += feature.attributes.Number_of_students_in_states
-    schoolsNumber += feature.attributes.Number_of_schools_in_states
-    /////////
-    students.push([feature.attributes.STATE,feature.attributes.Number_of_students_in_states])
-    schools.push([feature.attributes.STATE,feature.attributes.Number_of_schools_in_states])
-  }   
-
-  //populate the indecators with data
-  studentIndecator.textContent = `${studentNumber} Student`;
-  schoolIndecator.textContent = `${schoolsNumber} School`;
-
-          // chartdata,columnTitle,columnValueTitle,chartTitle,hAxisTitle,vAxisTitle,idContainer
-  drawChart(students,"State","Students Numbers","Students per State","Students","State",'red','state_students') // student state
-  drawChart(schools,"School","Schools Numbers","Schools per State","Schools","State",'blue','state_schools')   // school state
-
-});  
-   layer.queryFeatures(cityQuery).then(function(response){
-  let students = []
-  let schools = []
-  let features = response.features
-
-   
-     for (const feature of features) {
-    students.push([feature.attributes.CITY,feature.attributes.Number_of_students_in_cities])
-    schools.push([feature.attributes.CITY,feature.attributes.Number_of_schools_in_cities])
-  }   
-  drawChart(students,"School","Schools Numbers","Schools per city","Schools","State",'yellow','city_students') //student city 
-  drawChart(schools,"School","Schools Numbers","Schools per city","Schools","State",'green','city_schools') //school city
-});  
-}
+      })
+    }
 
 reactiveUtils.watch(
-  () => view?.extent,
-  (extent) => {
-    // console.log(view.updating);
-    if (!view.updating) {
-      queryData(extent)
-    }
-  },{
-    initial:false,
-    sync:false,
-  });
+  // getValue function
+  () => view.updating,
+  // callback
+  async (updating) => {
+    if (!updating) update()
+  }
+  );
+
+
+
+
+
 });
+
